@@ -1,5 +1,5 @@
 var express = require('express');
-var DataController = require('../controllers/data')(null, null);
+var controller = new (require('../controllers/data'))(null, null);
 var router = express.Router();
 
 router.get('/', function(req, res) {

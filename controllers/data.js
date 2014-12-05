@@ -10,7 +10,7 @@ DataController.prototype = {
         if(id) {
             var decodedId = this.idGenerator.get(id);
             
-            if(id) {
+            if(decodedId) {
                 obj = this.repository.get(decodedId);
                 
                 if(obj) {
@@ -18,23 +18,46 @@ DataController.prototype = {
                     
                     json(obj);
                     return;
+                } else {
+                    json({}, 404);
+                    return;
                 }
             } else {
-                json({}, 404);
+                json({}, 403);
                 return;
             }
         }
         
-        if(!obj) {
-            json({});
-        }
+        json({});
     },
-    update: function(obj, send) {
-        var id = this.idGenerator.create();
+    update: function(obj, json) {
+        var id = obj.id;
         
-        obj.id = id;
+        if(id) {
+            var decodedId = this.idGenerator.get(id);
+            
+            if(decodedId) {
+                obj.id = decodedId;
+                
+                this.repository.update(obj);
+        
+                obj.id = id;
+                
+                json(obj);
+                return;
+            } else {
+                json({}, 403);
+                return;
+            }
+        }
+
+        obj.id = this.idGenerator.create();
         
         this.repository.update(obj);
+        
+        obj.id = this.idGenerator.encode(obj.id);
+        
+        json(obj);
     }
 };
 
