@@ -1,5 +1,8 @@
 var express = require('express');
-var controller = new (require('../controllers/data'))(null, null);
+var base = require('../base')();
+var idGenerator = base.helper('idGenerator');
+var repository = base.repository('mongo');
+var controller = new (base.controller('data'))(idGenerator, repository, null);
 var router = express.Router();
 
 router.get('/', function(req, res) {

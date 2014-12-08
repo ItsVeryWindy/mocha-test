@@ -1,18 +1,19 @@
-var base = require('../base')();
+var base = require('../../../../base')();
 
 var DataController = base.controller('data');
 var sinon = base.sinon;
 var story = base.story;
 
 describe('Data Controller', function() {
-    var json, dataController, idGenerator, repository, obj;
+    var json, dataController, idGenerator, repository, obj, errors;
 
     beforeEach(function() {
         json = sinon.spy();
         
+        errors = [];
         idGenerator = new TestIdGenerator();
         repository = new TestRepository();
-        dataController = new DataController(idGenerator, repository);
+        dataController = new DataController(idGenerator, repository, validate);
     });
     
     story('Retrieving a new object')
@@ -32,7 +33,7 @@ describe('Data Controller', function() {
         .given(weHaveAnObject)
             .and(theObjectsIdIsInvalid)
         .when(theObjectIsBeingRetrieved)
-        .then(theObjectRenderedShouldBeEmptyWithACodeOf, 403)
+        .then(theObjectRenderedShouldBeEmptyWithACodeOf, 400)
         .execute();
 
     story('Retrieving an object with an unknown id')
@@ -54,7 +55,7 @@ describe('Data Controller', function() {
         .given(weHaveAnObject)
             .and(theObjectsIdIsInvalid)
         .when(theObjectIsBeingUpdated)
-        .then(theObjectRenderedShouldBeEmptyWithACodeOf, 403)
+        .then(theObjectRenderedShouldBeEmptyWithACodeOf, 400)
         .execute();
     
     story('Updating an object with a known id')
@@ -64,8 +65,19 @@ describe('Data Controller', function() {
             .and(theObjectShouldHaveBeenUpdatedInTheRepository)
         .execute();
     
+    story('Updating an invalid object with a known id')
+        .given(weHaveAnObject)
+            .and(theObjectHasAnError)
+        .when(theObjectIsBeingUpdated)
+        .then(theErrorShouldBeRenderedWithACodeOf, 400)
+        .execute();
+    
     function theObjectsIdIsInvalid() {
         idGenerator.invalidId = true;
+    }
+    
+    function theObjectHasAnError() {
+        errors = ['a field is missing'];
     }
     
     function theObjectIsUnknown() {
@@ -77,7 +89,7 @@ describe('Data Controller', function() {
     }
 
     function theObjectIsBeingRetrieved() {
-        dataController.get(obj.id, json);
+        dataController.get(obj._id, json);
     }
     
     function aNullObjectIsBeingRetrieved() {
@@ -98,12 +110,20 @@ describe('Data Controller', function() {
     
     function weHaveAnObject() {
         obj = {
-            id: 'aaa'
+            _id: 'aaa',
         };
+    }
+    
+    function validate(obj) {
+        return errors;
     }
 
     function theObjectRenderedShouldBeEmptyWithACodeOf(statusCode) {
         json.should.have.been.calledWith({}, statusCode);
+    }
+    
+    function theErrorShouldBeRenderedWithACodeOf(statusCode) {
+        json.should.have.been.calledWith(errors, statusCode);
     }
     
     function theObjectRenderedShouldBeEmpty() {
@@ -123,13 +143,13 @@ function TestIdGenerator() {
 }
 
 TestIdGenerator.prototype = {
-    get: function(id) {
+    decrypt: function(id) {
         return this.invalidId ? null : id;
     },
     create: function() {
         return this.createdId;
     },
-    encode: function(id) {
+    encrypt: function(id) {
         return id;
     },
     createdId: null,
@@ -142,9 +162,11 @@ function TestRepository() {
 }
 
 TestRepository.prototype = {
-    get: function(id) {
-        return (this.returnedObject && id == this.returnedObject.id) ? this.returnedObject : null;
+    get: function(id, callback) {
+        var obj = (this.returnedObject && id == this.returnedObject._id) ? this.returnedObject : null;
+        
+        callback(obj);
     },
-    update: sinon.spy(),
+    update: sinon.stub().callsArg(1),
     returnedObject: null
 };

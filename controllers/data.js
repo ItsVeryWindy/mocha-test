@@ -1,6 +1,7 @@
-function DataController(idGenerator, repository) {
+function DataController(idGenerator, repository, validate) {
     this.idGenerator = idGenerator;
     this.repository = repository;
+    this.validate = validate;
 }
 
 DataController.prototype = {
@@ -8,22 +9,25 @@ DataController.prototype = {
         var obj;
         
         if(id) {
-            var decodedId = this.idGenerator.get(id);
+            var decodedId = this.idGenerator.decrypt(id);
             
             if(decodedId) {
-                obj = this.repository.get(decodedId);
-                
-                if(obj) {
-                    obj.id = id;
+                this.repository.get(decodedId, function(dbObj) {
+                    obj = dbObj;
                     
-                    json(obj);
-                    return;
-                } else {
+                    if(obj) {
+                        obj._id = id;
+
+                        json(obj);
+                        return;
+                    }
+                    
                     json({}, 404);
-                    return;
-                }
+                });
+                
+                return;
             } else {
-                json({}, 403);
+                json({}, 400);
                 return;
             }
         }
@@ -31,33 +35,43 @@ DataController.prototype = {
         json({});
     },
     update: function(obj, json) {
-        var id = obj.id;
+        var id = obj._id,
+            idGenerator = this.idGenerator;
         
         if(id) {
-            var decodedId = this.idGenerator.get(id);
+            var decodedId = idGenerator.decrypt(id);
             
             if(decodedId) {
-                obj.id = decodedId;
+                obj._id = decodedId;
                 
-                this.repository.update(obj);
-        
-                obj.id = id;
+                var errors = this.validate(obj);
                 
-                json(obj);
+                if(errors.length > 0) {
+                    json(errors, 400);
+                    return;
+                }
+                
+                this.repository.update(obj, function() {
+                    obj._id = id;
+
+                    json(obj);                    
+                });
+                
                 return;
             } else {
-                json({}, 403);
+                json({}, 400);
                 return;
             }
         }
 
-        obj.id = this.idGenerator.create();
+        obj._id = idGenerator.create();
         
-        this.repository.update(obj);
+        this.repository.update(obj, function() {
         
-        obj.id = this.idGenerator.encode(obj.id);
+            obj._id = idGenerator.encrypt(obj._id);
         
-        json(obj);
+            json(obj);
+        });
     }
 };
 
