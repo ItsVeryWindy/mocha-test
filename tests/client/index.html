@@ -11,6 +11,8 @@
 		<!-- mocha -->
 		<script src="js/vendor/mocha.js" type="text/javascript" charset="utf-8"></script>
         <script src="js/test.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../../public/js/vendor/knockout.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../../public/js/vendor/knockout.validation.js" type="text/javascript" charset="utf-8"></script>
 		<script type="text/javascript" charset="utf-8">
 		// This will be overridden by mocha-helper if you run with grunt
 		mocha.setup('bdd');
@@ -19,7 +21,7 @@
 		<script src="js/vendor/chai.js" type="text/javascript" charset="utf-8"></script>
 		<script type="text/javascript" charset="utf-8">
 		// Setup chai
-		var should = chai.should;
+		var should = chai.should();
 		</script>
 		<!-- Include anything you want to test -->
 		<script src="../../public/js/models/item.js" type="text/javascript" charset="utf-8"></script>

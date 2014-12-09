@@ -112,6 +112,15 @@ module.exports = function (grunt) {
                     'mocha.js': 'mocha/mocha.js',
                     'chai.js': 'chai/chai.js'
                 },
+            },
+            libs_debug: {
+                options: {
+                    destPrefix: 'public/js/vendor'
+                },
+                files: {
+                    'knockout.js': 'knockout/dist/knockout.js',
+                    'knockout.validation.js': 'knockout-validation/Dist/knockout.validation.js'
+                },
             }
         }
     });
