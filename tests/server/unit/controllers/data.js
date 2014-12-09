@@ -1,19 +1,25 @@
-var base = require('../../../../base')();
+/* global require */
+/* global describe */
+/* global beforeEach */
+
+var base = require('../../../../base');
 
 var DataController = base.controller('data');
-var sinon = base.sinon;
-var story = base.story;
+
+var test = base.helper('test');
+
+var sinon = test.sinon;
+var story = test.story;
 
 describe('Data Controller', function() {
-    var json, dataController, idGenerator, repository, obj, errors;
+    var dataController, idGenerator, repository, obj, errors, res;
 
     beforeEach(function() {
-        json = sinon.spy();
-        
-        errors = [];
+        errors = null;
         idGenerator = new TestIdGenerator();
         repository = new TestRepository();
         dataController = new DataController(idGenerator, repository, validate);
+        res = new TestResponse();
     });
     
     story('Retrieving a new object')
@@ -89,19 +95,19 @@ describe('Data Controller', function() {
     }
 
     function theObjectIsBeingRetrieved() {
-        dataController.get(obj._id, json);
+        dataController.get(obj._id, res);
     }
     
     function aNullObjectIsBeingRetrieved() {
-        dataController.get(null, json);
+        dataController.get(null, res);
     }
     
     function theObjectIsBeingUpdated() {
-        dataController.update(obj, json);
+        dataController.update(obj, res);
     }
     
     function aNewObjectIsBeingUpdated() {
-        dataController.update({}, json);
+        dataController.update({}, res);
     }
     
     function theIdGeneratorWillCreateAnId() {
@@ -114,30 +120,34 @@ describe('Data Controller', function() {
         };
     }
     
-    function validate(obj) {
+    function validate() {
         return errors;
     }
 
     function theObjectRenderedShouldBeEmptyWithACodeOf(statusCode) {
-        json.should.have.been.calledWith({}, statusCode);
+        res.json.should.have.been.calledWith({}, statusCode);
     }
     
     function theErrorShouldBeRenderedWithACodeOf(statusCode) {
-        json.should.have.been.calledWith(errors, statusCode);
+        res.json.should.have.been.calledWith(errors, statusCode);
     }
     
     function theObjectRenderedShouldBeEmpty() {
-        json.should.have.been.calledWith({});
+        res.json.should.have.been.calledWith({});
     }
     
     function theObjectShouldBeRendered() {
-        json.should.have.been.calledWith(obj);
+        res.json.should.have.been.calledWith(obj);
     }
     
     function theObjectShouldHaveBeenUpdatedInTheRepository() {
         repository.update.should.have.been.calledWith(obj);
     }
 });
+
+function TestResponse() {
+    this.json = sinon.spy();
+}
 
 function TestIdGenerator() {
 }
@@ -151,6 +161,16 @@ TestIdGenerator.prototype = {
     },
     encrypt: function(id) {
         return id;
+    },
+    decryptObject: function() {
+        
+    },
+    createObject: function(obj) {
+        if(!obj._id) {
+            obj._id = this.create();
+        }
+    },
+    encryptObject: function() {
     },
     createdId: null,
     invalidId: false

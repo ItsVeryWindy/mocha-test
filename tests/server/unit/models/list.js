@@ -1,10 +1,17 @@
-var base = require('../../../../base')();
-var story = base.story;
-var should = base.should;
+/* global require */
+/* global describe */
+/* global beforeEach */
+
+var base = require('../../../../base');
+
+var test = base.helper('test');
+
 var List = base.model('list');
 var Item = base.model('item');
 
-describe('List', function() {
+var story = test.story;
+
+describe('List Model', function() {
     var list, errors;
 
     beforeEach(function() {
@@ -54,7 +61,7 @@ describe('List', function() {
     }
     
     function theItemIsRemoved() {
-        list.items.remove(function(player) {
+        list.items.remove(function() {
             return true;
         });
     }

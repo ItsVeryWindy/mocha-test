@@ -1,3 +1,5 @@
+/* global module */
+
 function DataController(idGenerator, repository, validate) {
     this.idGenerator = idGenerator;
     this.repository = repository;
@@ -5,72 +7,70 @@ function DataController(idGenerator, repository, validate) {
 }
 
 DataController.prototype = {
-    get: function(id, json) {
-        var obj;
-        
-        if(id) {
-            var decodedId = this.idGenerator.decrypt(id);
-            
-            if(decodedId) {
-                this.repository.get(decodedId, function(dbObj) {
-                    obj = dbObj;
-                    
-                    if(obj) {
-                        obj._id = id;
-
-                        json(obj);
-                        return;
-                    }
-                    
-                    json({}, 404);
-                });
-                
-                return;
-            } else {
-                json({}, 400);
-                return;
-            }
-        }
-        
-        json({});
-    },
-    update: function(obj, json) {
-        var id = obj._id,
-            idGenerator = this.idGenerator;
+    get: function(id, res) {
+        var idGenerator = this.idGenerator;
         
         if(id) {
             var decodedId = idGenerator.decrypt(id);
             
             if(decodedId) {
-                obj._id = decodedId;
-                
-                var errors = this.validate(obj);
-                
-                if(errors.length > 0) {
-                    json(errors, 400);
-                    return;
-                }
-                
-                this.repository.update(obj, function() {
-                    obj._id = id;
-
-                    json(obj);                    
+                this.repository.get(decodedId, function(obj) {
+                    if(obj) {
+                        idGenerator.encryptObject(obj);
+                    
+                        res.json(obj);
+                        return;
+                    }
+                    
+                    res.json({}, 404);
                 });
                 
                 return;
             } else {
-                json({}, 400);
+                res.json({}, 400);
                 return;
             }
         }
+        
+        res.json({});
+    },
+    update: function(obj, res) {
+        var id = obj._id,
+            idGenerator = this.idGenerator;
+        
+        var errors = this.validate(obj);
+                
+        if(errors !== null) {
+            res.json(errors, 400);
+            return;
+        }
+        
+        if(id) {
+            var decodedId = idGenerator.decrypt(id);
+            
+            if(decodedId) {
+                idGenerator.decryptObject(obj);
+                idGenerator.createObject(obj);
+                
+                this.repository.update(obj, function() {
+                    idGenerator.encryptObject(obj);
 
-        obj._id = idGenerator.create();
+                    res.json(obj);
+                });
+                
+                return;
+            } else {
+                res.json({}, 400);
+                return;
+            }
+        }
+        
+        idGenerator.createObject(obj);
         
         this.repository.update(obj, function() {
+            idGenerator.encryptObject(obj);
         
-            obj._id = idGenerator.encrypt(obj._id);
-        
-            json(obj);
+            res.json(obj);
         });
     }
 };

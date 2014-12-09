@@ -1,10 +1,14 @@
+/* global require */
+/* global describe */
+
 var mongoose = require('mongoose');
 
-var base = require('../../../../base')();
+var base = require('../../../../base');
+var test = base.helper('test');
 
 var MongoRepository = base.repository('mongo');
-var story = base.storyAsync;
-var should = base.should;
+var story = test.storyAsync;
+var should = test.should;
 
 describe('Mongo Repository', function() {
     var testSchema = new mongoose.Schema({ _id: String, name: String }, { versionKey: false });

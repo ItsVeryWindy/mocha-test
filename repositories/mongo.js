@@ -1,7 +1,10 @@
-var mongoose = require('mongoose');
-var base = require('../base')();
+/* global require */
+/* global module */
 
-mongoose.connect(base.config.database.url);
+var mongoose = require('mongoose');
+var base = require('../base');
+
+mongoose.connect(base.config().database.url);
 
 function MongoRepository(model) {
     this.model = model;
@@ -9,8 +12,6 @@ function MongoRepository(model) {
 
 MongoRepository.prototype = {
     update: function(obj, callback) {
-        var dbObj = new (this.model)(obj);
-        
         this.model.update({ _id: obj._id }, obj, { upsert: true }, function(err) {
             callback();
         });

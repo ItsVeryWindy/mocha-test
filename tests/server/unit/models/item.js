@@ -1,9 +1,16 @@
-var base = require('../../../../base')();
-var story = base.story;
-var should = base.should;
+/* global require */
+/* global describe */
+/* global beforeEach */
+
+var base = require('../../../../base');
+
+var test = base.helper('test');
+
 var Item = base.model('item');
 
-describe('Item', function() {
+var story = test.story;
+
+describe('Item Model', function() {
     var item, errors;
 
     beforeEach(function() {
