@@ -104,7 +104,7 @@ module.exports = function (grunt) {
             options: {
                 clean: false
             },
-            testlibs: {
+            libs_test: {
                 options: {
                     destPrefix: 'tests/client/js/vendor'
                 },
@@ -114,6 +114,15 @@ module.exports = function (grunt) {
                 },
             },
             libs_debug: {
+                options: {
+                    destPrefix: 'public/js/vendor'
+                },
+                files: {
+                    'knockout.js': 'knockout/dist/knockout.debug.js',
+                    'knockout.validation.js': 'knockout-validation/Src/knockout.validation.js'
+                },
+            },
+            libs_release: {
                 options: {
                     destPrefix: 'public/js/vendor'
                 },

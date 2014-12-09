@@ -43,8 +43,8 @@
         function theItemShouldHaveAValidationError() {
             errors.length.should.not.be.empty;
             item.isValid().should.be.false;
-            errors[0]().should.contain('Description');
-            errors[0]().should.contain('required');
+            errors[0].should.contain('Description');
+            errors[0].should.contain('required');
         }
     });
 })();
