@@ -58,16 +58,18 @@ module.exports = function (grunt) {
                 src: ['tests/**/*.js']
             }
         },
-        // mocha: {
-        //   test: {
-        //     src: ['tests/client/**/*.html'],
-        //     options: {
-        //         reporter: 'Spec',
-        //         run: true,
-        //         //timeout: 10000
-        //     }
-        //   },
-        // },
+        mocha: {
+            test: {
+                src: ['tests/client/index.html'],
+                options: {
+                    reporter: 'Spec',
+                    run: true,
+                    log: true,
+                    logErrors: true
+                    //timeout: 10000
+                }
+            },
+        },
         mochaTest: {
           test: {
             options: {
@@ -97,6 +99,20 @@ module.exports = function (grunt) {
                 files: '<%= jshint.tests.src %>',
                 tasks: ['jshint:tests', 'mocha']
             }
+        },
+        bowercopy: {
+            options: {
+                clean: false
+            },
+            testlibs: {
+                options: {
+                    destPrefix: 'tests/client/js/vendor'
+                },
+                files: {
+                    'mocha.js': 'mocha/mocha.js',
+                    'chai.js': 'chai/chai.js'
+                },
+            }
         }
     });
 
@@ -108,6 +124,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-mocha-test');
     grunt.loadNpmTasks('grunt-webdriver');
+    grunt.loadNpmTasks('grunt-bowercopy');
 
     // Default task
     grunt.registerTask('default', ['jshint', /*'mocha',*/ 'mochaTest', /*'webdriver',*/ 'concat', 'uglify']);
